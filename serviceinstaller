@@ -1,0 +1,258 @@
+#!/bin/bash
+
+#Apache2 install function
+Apache2(){
+    clear
+    apt list --installed 2>/dev/null | grep apache
+
+    if [ $? -eq 0 ];
+        then
+        1>/dev/null
+        echo "Apache2 already install."
+        else
+        apt-get update
+        apt-get install -f apache2 -y
+        systemctl enable apache2.service 
+        systemctl start apache2.service 
+        echo "Apache2 installation done."
+    fi
+    sleep 5
+}
+
+#Nginx install function
+Nginx(){
+    clear
+    apt list --installed 2>/dev/null | grep nginx
+
+    if [ $? -eq 0 ];
+        then
+        1>/dev/null
+        echo "Nginx already install."
+        else
+        apt-get update
+        apt-get install -f nginx -y
+        systemctl enable nginx.service 
+        systemctl start nginx.service 
+        echo "Nginx installation done."
+    fi
+    sleep 5
+ }
+
+#PHP install function
+PHP(){
+    apt-get install software-properties-common -y
+    add-apt-repository ppa:ondrej/php
+    apt-get update
+    apt-get install -f -y php7.0 libapache2-mod-php7.0 php7.0-cli php7.0-common php7.0-mbstring php7.0-gd php7.0-intl php7.0-xml php7.0-mysql php7.0-mcrypt php7.0-zip php7.0-fpm
+    apt-get install -f -y php7.1 php7.1-cli php7.1-common php7.1-json php7.1-opcache php7.1-mysql php7.1-mbstring php7.1-mcrypt php7.1-zip php7.1-fpm
+    apt-get install -f -y php7.2 php7.2-cli php7.2-common php7.2-curl php7.2-gd php7.2-json php7.2-mbstring php7.2-intl php7.2-mysql php7.2-xml php7.2-zip php7.2-fpm
+    apt-get install -f -y php7.3 php7.3-cli php7.3-common php-pear php7.3-curl php7.3-dev php7.3-gd php7.3-mbstring php7.3-zip php7.3-mysql php7.3-xml php7.3-fpm libapache2-mod-php7.3 php7.3-imagick php7.3-recode php7.3-tidy php7.3-xmlrpc php7.3-intl
+    apt-get install -f -y php7.4 php7.4-common php7.4-fpm php7.4-mysql php7.4-xml php7.4-xmlrpc php7.4-curl php7.4-gd php7.4-imagick php7.4-cli php7.4-dev php7.4-imap php7.4-mbstring php7.4-opcache php7.4-soap php7.4-zip php7.4-intl
+    apt-get install -f -y php8.0 libapache2-mod-php8.0 php8.0-fpm libapache2-mod-fcgid php8.0-mysql php8.0-gd php8.0-common php8.0-mysql php8.0-xml php8.0-curl php8.0-gd php8.0-imagick php8.0-cli php8.0-dev php8.0-imap php8.0-mbstring php8.0-opcache php8.0-soap php8.0-zip
+    systemctl restart php*-fp*
+    if [ -d /etc/nginx ];
+        then
+        systemctl restart nginx
+        else
+        systemctl restart apache2
+    fi
+    echo "PHP Installation Done"
+    sleep 5
+}
+
+# Composers Install
+Composers(){
+    clear
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    composer -V
+    sleep 5
+}
+
+# Vim install
+Vim(){
+    clear
+    apt-get install -f -y vim
+    echo "Vim editor installation done."
+    sleep 5
+}
+
+# Git install
+Git(){
+    clear
+    apt-get install -f -y git
+    echo "Git editor installation done."
+    sleep 5
+}
+
+# Mysql install
+
+Mysql(){
+    clear
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5072E1F5
+    echo "deb http://repo.mysql.com/apt/ubuntu/ $(lsb_release -cs) mysql-$mysqlver" > /etc/apt/sources.list.d/mysql.list
+    apt-get update
+    echo "mysql-community-server mysql-community-server/root-pass password $mysqlpass" | debconf-set-selections
+    echo "mysql-community-server mysql-community-server/re-root-pass password $mysqlpass" | debconf-set-selections
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -f -y install mysql-server
+    echo "Mysql installation done."
+    sleep 5
+}
+
+# PhpMyadmin install
+
+PhpMyadmin(){
+    clear
+    echo "Warning: WebServer and Mysql require before installation"
+    sed -ri -e 's/memory_limit = .*/memory_limit = '4096M'/' /etc/php/*/fpm/php.ini
+    sed -ri -e 's/post_max_size = .*/post_max_size = '20480M'/' /etc/php/*/fpm/php.ini
+    sed -ri -e 's/upload_max_filesize = .*/upload_max_filesize = '20480M'/' /etc/php/*/fpm/php.ini
+    sed -ri -e 's/upload_tmp_dir = .*/upload_tmp_dir = \/tmp/' /etc/php/*/fpm/php.ini
+    systemctl restart php*-fp*
+     if [ -d /etc/nginx ];
+        then
+        systemctl restart nginx
+        else
+        systemctl restart apache2
+    fi
+    if [ -d /etc/nginx ];
+        then 
+        ln -s /usr/share/phpmyadmin /var/www/html
+        else
+        echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
+    fi
+    echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | debconf-set-selections 
+    echo "phpmyadmin phpmyadmin/mysql/admin-user string root" | debconf-set-selections 
+    echo "phpmyadmin phpmyadmin/mysql/admin-pass password $mysqlpass" | debconf-set-selections 
+    echo "phpmyadmin phpmyadmin/mysql/app-pass password $mysqlpass" |debconf-set-selections 
+    echo "phpmyadmin phpmyadmin/app-password-confirm password $mysqlpass" | debconf-set-selections 
+    apt-get install -f phpmyadmin --fix-broken --fix-missing -y
+
+    echo "PhpMyAdmin Installation done"
+    sleep 5
+}
+
+# Node install
+Node(){
+    clear
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+    source $NVM_DIR/nvm.sh
+    nvm install $nodever
+    nvm alias default $nodever
+    nvm use default
+    source ~/.bashrc
+    node -v
+    npm -v
+    echo "Node v$nodever installation done"
+    sleep 5
+}
+
+
+# MongoDb install
+
+MongoDb(){
+    clear
+    apt-get install gnupg -f
+    wget -qO - https://www.mongodb.org/static/pgp/server-$mongover.asc | sudo apt-key add -
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/$mongover multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-$mongover.list
+    sudo apt-get update
+    sudo apt-get install -f -y mongodb-org
+    mongo admin --eval "db.createUser({ user : '$mongousr', pwd : '$mongopass', roles : [{ role: 'userAdminAnyDatabase', db: 'admin'}, 'readWriteAnyDatabase']});"
+    echo "security:" >> /etc/mongod.conf
+    echo "  authorization: \"enabled\"" >> /etc/mongod.conf
+    systemctl restart mongod
+    mongo --version
+    echo "Mongodb v$mongover installation done"
+    sleep 5
+}
+
+#PostgresSQL install
+PostgresSQL(){
+    clear
+    apt-get update
+    apt-get install -f -y postgresql postgresql-contrib
+    psql -V
+    echo "PostgresSQL installation done"
+    sleep 5
+}
+
+# PgAdmin install
+PgAdmin(){
+    clear
+    curl https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo apt-key add -
+    echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list
+    apt-get update
+    apt-get install pgadmin4 
+    /usr/pgadmin4/bin/setup-web.sh --yes
+    echo "PgAdmin installation done"
+    sleep 5
+}
+
+#Main Function
+
+clear
+apt list --installed 2>/dev/null | grep whiptail
+
+if [ $? -ne 0 ];
+    then 
+    apt-get update
+    apt-get install whiptail -y
+    else
+    whiptail --checklist "Please select the services" 10 60 5 \
+            Apache2 "" off \
+            Nginx "" off \
+            PHP "" off \
+            Composers "" off \
+            Mysql "" off \
+            PhpMyadmin "" off  \
+            Node "" off \
+            MongoDb "" off \
+            PostgresSQL "" off \
+            PgAdmin "" off \
+            Git "" off \
+            Vim "" off \
+            3>&1 1>&2 2>&3 | tee /tmp/select
+    clear
+fi
+
+select=$(cat /tmp/select | tr -d '"' | tr ' ' '\n')
+
+echo -e "$select" | while read query
+        do
+           if [ "$query" == "Mysql" ];
+                then
+                echo "Mysql"
+                touch /tmp/mysql
+            elif [ "$query" == "Node" ];   
+                then
+                echo "Node"
+                touch /tmp/node
+            elif [ "$query" == "MongoDb" ];
+                then
+                echo "Mongo"
+                touch /tmp/mongo
+            fi;
+        done
+
+if [ -f /tmp/mysql ];
+    then
+    #echo "Mysql"
+    read -p "Please enter the Mysql version[5.7 or 8.0]= " mysqlver
+    read -p "Please enter the Root Password= " mysqlpass
+fi 
+if [ -f /tmp/node ];   
+    then
+    #echo "Node"
+        read -p "Enter Node version = " nodever
+fi
+if [ -f /tmp/mongo ];
+    then
+    #echo "Mongo"
+        read -p "Please enter your Mongo Version= " mongover
+        read -p "Please enter your Admin User= " mongousr
+        read -p "Please enter your Admin Password= " mongopass
+fi
+   
+
+echo -e "$select" | while read services; do $services; done
+rm -f /tmp/{select,mysql,node,mongo}
+exit
