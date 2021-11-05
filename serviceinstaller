@@ -192,6 +192,7 @@ PgAdmin(){
 #Main Function
 
 clear
+figlet -c "CYWEAP"
 apt update
 apt list --installed 2>/dev/null | grep whiptail
 
@@ -200,7 +201,7 @@ if [ $? -ne 0 ];
     apt-get update
     apt-get install whiptail -y
     else
-    whiptail --checklist "Please select the services" 10 60 5 \
+    whiptail --checklist "Please select the services" 20 35 13 \
             Apache2 "" off \
             Nginx "" off \
             PHP "" off \
