@@ -56,6 +56,7 @@ PHP(){
         else
         systemctl restart apache2
     fi
+    update-alternatives --set php /usr/bin/php$phpver
     echo "PHP Installation Done"
     sleep 5
 }
@@ -64,6 +65,7 @@ PHP(){
 Composers(){
     clear
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    composer self-update --$comver
     composer -V
     sleep 5
 }
@@ -202,7 +204,7 @@ if [ $? -ne 0 ];
             Apache2 "" off \
             Nginx "" off \
             PHP "" off \
-            Composers "" off \
+            Composer "" off \
             Mysql "" off \
             PhpMyadmin "" off  \
             Node "" off \
@@ -221,16 +223,24 @@ echo -e "$select" | while read query
         do
            if [ "$query" == "Mysql" ];
                 then
-                echo "Mysql"
+                #echo "Mysql"
                 touch /tmp/mysql
             elif [ "$query" == "Node" ];   
                 then
-                echo "Node"
+                #echo "Node"
                 touch /tmp/node
             elif [ "$query" == "MongoDb" ];
                 then
-                echo "Mongo"
+                #echo "Mongo"
                 touch /tmp/mongo
+            elif [ "$query" == "PHP" ]
+                then
+                #echo "PHP"
+                touch /tmp/php
+            elif [ "$query" == "Composer" ]
+                then
+                #echo "Composer"
+                touch /tmp/composer
             fi;
         done
 
@@ -252,8 +262,15 @@ if [ -f /tmp/mongo ];
         read -p "Please enter your Admin User= " mongousr
         read -p "Please enter your Admin Password= " mongopass
 fi
-   
-
+if [ -f /tmp/php ];
+    then
+    #echo "PHP"
+    read -p "Please select the PHP default version[ 7.0 or 7.1 or 7.2 or 7.3 or 7.4 or 8.0 ]= " phpver
+fi
+if [ -f /tmp/composer ];
+    then
+    read -p "Please select Composer default version [ 1 or 2 ]= " comver
+fi
 echo -e "$select" | while read services; do $services; done
-rm -f /tmp/{select,mysql,node,mongo}
+rm -f /tmp/{select,mysql,node,mongo,php,composer}
 exit
