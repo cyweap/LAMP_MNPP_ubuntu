@@ -91,11 +91,22 @@ Git(){
 Mysql(){
     clear
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5072E1F5
-    echo "deb http://repo.mysql.com/apt/ubuntu/ $(lsb_release -cs) mysql-$mysqlver" > /etc/apt/sources.list.d/mysql.list
+    if [ "$mysqlver" == "5.7" ];
+        then
+        echo "deb http://repo.mysql.com/apt/ubuntu/ bionic mysql-$mysqlver" > /etc/apt/sources.list.d/mysql.list
+        else
+        echo "deb http://repo.mysql.com/apt/ubuntu/ $(lsb_release -cs) mysql-$mysqlver" > /etc/apt/sources.list.d/mysql.list
+    fi
     apt-get update
+    apt-cache policy mysql-server
     echo "mysql-community-server mysql-community-server/root-pass password $mysqlpass" | debconf-set-selections
     echo "mysql-community-server mysql-community-server/re-root-pass password $mysqlpass" | debconf-set-selections
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -f -y install mysql-server
+    if [ "$mysqlver" == "5.7" ];
+        then
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -f mysql-client=$mysqlver* mysql-community-server=$mysqlver* mysql-server=$mysqlver* -y
+        else
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -f -y install mysql-server
+    fi
     echo "Mysql installation done."
     sleep 5
 }
@@ -220,7 +231,7 @@ fi
 
 select=$(cat /tmp/select | tr -d '"' | tr ' ' '\n')
 
-echo -e "$select" | while read query
+echo -e "$select" | while read query;
         do
            if [ "$query" == "Mysql" ];
                 then
@@ -234,11 +245,11 @@ echo -e "$select" | while read query
                 then
                 #echo "Mongo"
                 touch /tmp/mongo
-            elif [ "$query" == "PHP" ]
+            elif [ "$query" == "PHP" ];
                 then
                 #echo "PHP"
                 touch /tmp/php
-            elif [ "$query" == "Composer" ]
+            elif [ "$query" == "Composer" ];
                 then
                 #echo "Composer"
                 touch /tmp/composer
