@@ -213,7 +213,7 @@ if [ $? -ne 0 ];
 fi
     
 figlet -c "CYWEAP"
-
+sleep 5
 apt list --installed 2>/dev/null | grep whiptail
 
 if [ $? -ne 0 ];
