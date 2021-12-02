@@ -203,8 +203,17 @@ PgAdmin(){
 #Main Function
 
 clear
+
+apt update && apt install curl -y
+
+apt list --installed 2>/dev/null | grep figlet
+if [ $? -ne 0 ];
+    then
+    apt-get install figlet -y
+fi
+    
 figlet -c "CYWEAP"
-apt update
+
 apt list --installed 2>/dev/null | grep whiptail
 
 if [ $? -ne 0 ];
