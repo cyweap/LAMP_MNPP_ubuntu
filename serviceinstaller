@@ -147,12 +147,11 @@ PhpMyadmin(){
 # Node install
 Node(){
     clear
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-    source $NVM_DIR/nvm.sh
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+    source ~/.bashrc
     nvm install $nodever
     nvm alias default $nodever
     nvm use default
-    source ~/.bashrc
     node -v
     npm -v
     echo "Node v$nodever installation done"
