@@ -7,7 +7,7 @@ Apache2(){
 
     if [ $? -eq 0 ];
         then
-        1>/dev/null
+        apt list --installed 2>/dev/null | grep apache
         echo "Apache2 already install."
         else
         apt-get update
