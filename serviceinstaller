@@ -117,7 +117,7 @@ PhpMyadmin(){
     clear
     echo "Warning: WebServer and Mysql require before installation"
     apt-get update
-    apt-get install php7*-mbstring php7*-zip php7*-gd php7*-json php7*-curl php8*-mbstring php8*-zip php8*-gd php8*-json php8*-curl -y
+    apt-get install php7*-mbstring php7*-zip php7*-gd php7*-json php7*-curl php7*-mcrypt php8*-mbstring php8*-zip php8*-gd php8*-json php8*-curl php8*-mcrypt -y
     sed -ri -e 's/memory_limit = .*/memory_limit = '4096M'/' /etc/php/*/fpm/php.ini
     sed -ri -e 's/post_max_size = .*/post_max_size = '20480M'/' /etc/php/*/fpm/php.ini
     sed -ri -e 's/upload_max_filesize = .*/upload_max_filesize = '20480M'/' /etc/php/*/fpm/php.ini
@@ -132,6 +132,7 @@ PhpMyadmin(){
     if [ -d /etc/nginx ];
         then 
         ln -s /usr/share/phpmyadmin /var/www/html
+        echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect nginx" | debconf-set-selections
         else
         echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
     fi
@@ -142,7 +143,14 @@ PhpMyadmin(){
     echo "phpmyadmin phpmyadmin/app-password-confirm password $mysqlpass" | debconf-set-selections 
     apt-get install -f phpmyadmin --fix-broken --fix-missing -y
     sudo phpenmod mbstring
-    systemctl restart apache2
+    sudo phpenmod mcrypt
+    systemctl restart php*-fp*
+    if [ -d /etc/nginx ];
+        then 
+        systemctl restart nginx
+        else
+        systemctl restart apache2
+    fi
     echo "PhpMyAdmin Installation done"
     sleep 5
 }
