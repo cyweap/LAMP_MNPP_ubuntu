@@ -116,6 +116,8 @@ Mysql(){
 PhpMyadmin(){
     clear
     echo "Warning: WebServer and Mysql require before installation"
+    apt-get update
+    apt-get install php-mbstring php-zip php-gd php-json php-curl -y
     sed -ri -e 's/memory_limit = .*/memory_limit = '4096M'/' /etc/php/*/fpm/php.ini
     sed -ri -e 's/post_max_size = .*/post_max_size = '20480M'/' /etc/php/*/fpm/php.ini
     sed -ri -e 's/upload_max_filesize = .*/upload_max_filesize = '20480M'/' /etc/php/*/fpm/php.ini
@@ -139,7 +141,8 @@ PhpMyadmin(){
     echo "phpmyadmin phpmyadmin/mysql/app-pass password $mysqlpass" |debconf-set-selections 
     echo "phpmyadmin phpmyadmin/app-password-confirm password $mysqlpass" | debconf-set-selections 
     apt-get install -f phpmyadmin --fix-broken --fix-missing -y
-
+    sudo phpenmod mbstring
+    systemctl restart apache2
     echo "PhpMyAdmin Installation done"
     sleep 5
 }
@@ -147,7 +150,7 @@ PhpMyadmin(){
 # Node install
 Node(){
     clear
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
     source $NVM_DIR/nvm.sh
     nvm install $nodever
     nvm alias default $nodever
@@ -280,8 +283,8 @@ if [ -f /tmp/mongo ];
     then
     #echo "Mongo"
         read -p "Please enter your Mongo Version= " mongover
-        read -p "Please enter your Admin User= " mongousr
-        read -p "Please enter your Admin Password= " mongopass
+        read -p "Please enter your Mongo Admin User= " mongousr
+        read -p "Please enter your Mongo Admin Password= " mongopass
 fi
 if [ -f /tmp/php ];
     then
