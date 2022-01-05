@@ -118,6 +118,7 @@ PhpMyadmin(){
     echo "Warning: WebServer and Mysql require before installation"
     apt-get update
     apt-get install php7*-mbstring php7*-zip php7*-gd php7*-json php7*-curl php7*-mcrypt php8*-mbstring php8*-zip php8*-gd php8*-json php8*-curl php8*-mcrypt -y
+    apt install php libapache2-mod-php* -y
     sed -ri -e 's/memory_limit = .*/memory_limit = '4096M'/' /etc/php/*/fpm/php.ini
     sed -ri -e 's/post_max_size = .*/post_max_size = '20480M'/' /etc/php/*/fpm/php.ini
     sed -ri -e 's/upload_max_filesize = .*/upload_max_filesize = '20480M'/' /etc/php/*/fpm/php.ini
@@ -144,6 +145,11 @@ PhpMyadmin(){
     apt-get install -f phpmyadmin --fix-broken --fix-missing -y
     sudo phpenmod mbstring
     sudo phpenmod mcrypt
+    a2dismod php7.*
+    a2dismod php8.*
+    systemctl restart apache2
+    a2enmod php8.0
+    systemctl restart apache2
     systemctl restart php*-fp*
     if [ -d /etc/nginx ];
         then 
