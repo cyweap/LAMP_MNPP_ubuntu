@@ -148,7 +148,7 @@ PhpMyadmin(){
     a2dismod php7.*
     a2dismod php8.*
     systemctl restart apache2
-    a2enmod php8.0
+    a2enmod php7.4
     systemctl restart apache2
     systemctl restart php*-fp*
     if [ -d /etc/nginx ];
